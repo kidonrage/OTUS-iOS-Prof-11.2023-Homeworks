@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct HomeworkApp: App {
+    
+    @StateObject var appRouter = AppRouter()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appRouter)
         }
     }
 }
