@@ -34,10 +34,17 @@ struct ContentView: View {
                 .tabItem {
                     Label("Торчун", systemImage: "lanyardcard")
                 }
+            
+            NewsScreen()
+                .tag(Tab.news)
+                .tabItem {
+                    Label("Новости", systemImage: "newspaper")
+                }
         }
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(AppRouter())
 }

@@ -12,4 +12,5 @@ enum Tab: Hashable {
     case anotherTabOpener
     case list
     case bottomSheet
+    case news
 }
