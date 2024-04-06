@@ -26,12 +26,25 @@ enum Tab: CaseIterable {
     }
 }
 
+final class DatabaseViewModel: ObservableObject {
+    
+    @Published var characters = [Character]()
+    
+    init() {
+        RickAndMortyAPI.shared.getCharacters { [weak self] characters in
+            self?.characters = characters
+        }
+    }
+}
+
 struct DatabaseScreen: View {
     
-    @EnvironmentObject var viewModel: NavigationViewModel
+    @EnvironmentObject var navigationViewModel: NavigationViewModel
     
     @State var selectedTabIndex = 0
     var tabs = Tab.allCases
+    
+    @ObservedObject var viewModel = DatabaseViewModel()
     
     var body: some View {
         VStack {
@@ -55,12 +68,30 @@ struct DatabaseScreen: View {
     }
     
     var charactersList: some View {
-        List(0..<10) { item in
-            Button(action: {
-                viewModel.push(screenView: DetailsScreen())
-            }, label: {
-                Text("Character " + String(item))
-            })
+        List(viewModel.characters, id: \.id) { character in
+            Button(
+                action: {
+                    navigationViewModel.push(screenView: DetailsScreen())
+                },
+                label: {
+                    HStack(alignment: .center, spacing: 14) {
+                        AsyncImage(
+                            url: URL(string: character.image),
+                            content: { image in
+                                image.resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            },
+                            placeholder: {
+                                ProgressView()
+                            }
+                        )
+                        .frame(width: 150, height: 150)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        
+                        Text(character.name)
+                    }
+                }
+            )
         }
     }
     
