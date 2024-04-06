@@ -6,16 +6,18 @@
 //
 
 import SwiftUI
+import CustomNavigationStack
 
 @main
 struct HomeworkApp: App {
     
-    @StateObject var appRouter = AppRouter()
+    private let viewModel = NavigationViewModel()
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(appRouter)
+            CustomNavigationView(viewModel: viewModel, contentBuilder: {
+                DatabaseScreen()
+            }, transition: (push: .scale, pop: .slide))
         }
     }
 }
