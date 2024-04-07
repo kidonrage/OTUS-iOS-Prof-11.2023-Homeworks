@@ -13,3 +13,10 @@ public struct Episode: Identifiable, Decodable {
     public let name: String
     public let episode: String
 }
+
+
+public struct EpisodesReponse: Decodable {
+    
+    public let info: ResponseInfo
+    public let results: [Episode]
+}

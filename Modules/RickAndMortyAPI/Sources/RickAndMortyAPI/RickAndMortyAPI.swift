@@ -15,10 +15,13 @@ public final class RickAndMortyAPI {
     
     private init() {}
     
+    // MARK: - Public
+    
     public func getCharacters(page: Int, completionHandler: @escaping ([Character]) -> Void) {
         let url = URL(string: "https://rickandmortyapi.com/api/character/?page=\(page)")!
         let request = URLRequest(url: url)
         URLSession.shared.dataTask(with: request) { data, response, error in
+//            sleep(2)
             guard error == nil else {
                 assertionFailure(error?.localizedDescription ?? "Unknown error")
                 return
@@ -45,6 +48,7 @@ public final class RickAndMortyAPI {
         let url = URL(string: "https://rickandmortyapi.com/api/location/?page=\(page)")!
         let request = URLRequest(url: url)
         URLSession.shared.dataTask(with: request) { data, response, error in
+//            sleep(2)
             guard error == nil else {
                 assertionFailure(error?.localizedDescription ?? "Unknown error")
                 return
@@ -55,6 +59,33 @@ public final class RickAndMortyAPI {
             }
             do {
                 let responseObj = try self.decoder.decode(LocationsResponse.self, from: data)
+                DispatchQueue.main.async {
+                    completionHandler(responseObj)
+                }
+            } catch {
+                print(error.localizedDescription)
+                DispatchQueue.main.async {
+                    completionHandler(nil)
+                }
+            }
+        }.resume()
+    }
+    
+    public func loadEpisodes(page: Int, completionHandler: @escaping (EpisodesReponse?) -> Void) {
+        let url = URL(string: "https://rickandmortyapi.com/api/episode/?page=\(page)")!
+        let request = URLRequest(url: url)
+        URLSession.shared.dataTask(with: request) { data, response, error in
+//            sleep(2)
+            guard error == nil else {
+                assertionFailure(error?.localizedDescription ?? "Unknown error")
+                return
+            }
+            guard let data else {
+                assertionFailure("Data is empty")
+                return
+            }
+            do {
+                let responseObj = try self.decoder.decode(EpisodesReponse.self, from: data)
                 DispatchQueue.main.async {
                     completionHandler(responseObj)
                 }

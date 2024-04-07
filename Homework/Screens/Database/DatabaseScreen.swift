@@ -58,36 +58,45 @@ struct DatabaseScreen: View {
     
     var charactersList: some View {
         List(viewModel.characters.enumerated().map({ $0 }), id: \.element.id) { index, character in
-            Button(
-                action: {
-                    navigationViewModel.push(
-                        screenView: CharacterDetailsScreen(
-                            character: character
+            VStack {
+                Button(
+                    action: {
+                        navigationViewModel.push(
+                            screenView: CharacterDetailsScreen(
+                                character: character
+                            )
                         )
-                    )
-                },
-                label: {
-                    HStack(alignment: .center, spacing: 14) {
-                        AsyncImage(
-                            url: URL(string: character.image),
-                            content: { image in
-                                image.resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            },
-                            placeholder: {
-                                ProgressView()
-                            }
-                        )
-                        .frame(width: 150, height: 150)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        
-                        Text(character.name)
+                    },
+                    label: {
+                        HStack(alignment: .center, spacing: 14) {
+                            AsyncImage(
+                                url: URL(string: character.image),
+                                content: { image in
+                                    image.resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                },
+                                placeholder: {
+                                    ProgressView()
+                                }
+                            )
+                            .frame(width: 150, height: 150)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            
+                            Text(character.name)
+                            
+                            Spacer()
+                        }
+                        .onAppear(perform: {
+                            viewModel.loadNextCharactersPageIfNeeded(appearedCharacterIndex: index)
+                        })
                     }
-                    .onAppear(perform: {
-                        viewModel.loadNextCharactersPageIfNeeded(appearedCharacterIndex: index)
-                    })
+                )
+                if viewModel.needToDisplayActivityInCharacter(onIndex: index) {
+                    ProgressView()
+                        .scaleEffect(2.0, anchor: .center)
+                        .padding(.vertical, 16)
                 }
-            )
+            }
         }
         .onAppear(perform: {
             viewModel.loadInitialCharactersIfNeeded()
@@ -100,6 +109,15 @@ struct DatabaseScreen: View {
                 Text(location.name)
                 Text(location.dimension)
                     .font(.caption)
+                if viewModel.needToDisplayActivityInLocation(onIndex: index) {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .scaleEffect(2.0, anchor: .center)
+                            .padding(.vertical, 16)
+                        Spacer()
+                    }
+                }
             }
                 .onAppear(perform: {
                     viewModel.loadNextLocationsPageIfNeeded(appearedLocationIndex: index)
@@ -111,9 +129,28 @@ struct DatabaseScreen: View {
     }
     
     var episodesList: some View {
-        List(0..<10) { item in
-            Text("Episode " + String(item))
+        List(viewModel.episodes.enumerated().map({ $0 }), id: \.element.id) { index, episode in
+            VStack(alignment: .leading) {
+                Text(episode.name)
+                Text(episode.episode)
+                    .font(.caption)
+                if viewModel.needToDisplayActivityInEpisode(onIndex: index) {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .scaleEffect(2.0, anchor: .center)
+                            .padding(.vertical, 16)
+                        Spacer()
+                    }
+                }
+            }
+                .onAppear(perform: {
+                    viewModel.loadNextEpisodesPageIfNeeded(appearedEpisodeIndex: index)
+                })
         }
+        .onAppear(perform: {
+            viewModel.loadInitialEpisodesIfNeeded()
+        })
     }
 }
 
