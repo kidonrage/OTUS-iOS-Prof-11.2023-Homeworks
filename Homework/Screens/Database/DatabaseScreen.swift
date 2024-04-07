@@ -57,7 +57,7 @@ struct DatabaseScreen: View {
     }
     
     var charactersList: some View {
-        List(viewModel.characters, id: \.id) { character in
+        List(viewModel.characters.enumerated().map({ $0 }), id: \.element.id) { index, character in
             Button(
                 action: {
                     navigationViewModel.push(
@@ -84,23 +84,30 @@ struct DatabaseScreen: View {
                         Text(character.name)
                     }
                     .onAppear(perform: {
-                        if viewModel.characters[viewModel.characters.count - 1].id == character.id {
-                            // perform loading
-                            viewModel.loadNextCharactersPage()
-                        }
+                        viewModel.loadNextCharactersPageIfNeeded(appearedCharacterIndex: index)
                     })
                 }
             )
         }
         .onAppear(perform: {
-            viewModel.loadNextCharactersPage()
+            viewModel.loadInitialCharactersIfNeeded()
         })
     }
     
     var locationsList: some View {
-        List(0..<10) { item in
-            Text("Location " + String(item))
+        List(viewModel.locations.enumerated().map({ $0 }), id: \.element.id) { index, location in
+            VStack(alignment: .leading) {
+                Text(location.name)
+                Text(location.dimension)
+                    .font(.caption)
+            }
+                .onAppear(perform: {
+                    viewModel.loadNextLocationsPageIfNeeded(appearedLocationIndex: index)
+                })
         }
+        .onAppear(perform: {
+            viewModel.loadInitialLocationsIfNeeded()
+        })
     }
     
     var episodesList: some View {

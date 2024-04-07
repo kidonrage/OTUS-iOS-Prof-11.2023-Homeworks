@@ -41,6 +41,32 @@ public final class RickAndMortyAPI {
         }.resume()
     }
     
+    public func loadLocations(page: Int, completionHandler: @escaping (LocationsResponse?) -> Void) {
+        let url = URL(string: "https://rickandmortyapi.com/api/location/?page=\(page)")!
+        let request = URLRequest(url: url)
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            guard error == nil else {
+                assertionFailure(error?.localizedDescription ?? "Unknown error")
+                return
+            }
+            guard let data else {
+                assertionFailure("Data is empty")
+                return
+            }
+            do {
+                let responseObj = try self.decoder.decode(LocationsResponse.self, from: data)
+                DispatchQueue.main.async {
+                    completionHandler(responseObj)
+                }
+            } catch {
+                print(error.localizedDescription)
+                DispatchQueue.main.async {
+                    completionHandler(nil)
+                }
+            }
+        }.resume()
+    }
+    
     public func loadLocation(locationUrl: URL, completionHandler: @escaping (Location?) -> Void) {
         let request = URLRequest(url: locationUrl)
         URLSession.shared.dataTask(with: request, completionHandler: { data, respone, error in

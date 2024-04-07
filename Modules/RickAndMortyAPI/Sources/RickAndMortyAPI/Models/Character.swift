@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Character: Decodable {
+public struct Character: Identifiable, Decodable {
     
     public struct Location: Decodable {
         
