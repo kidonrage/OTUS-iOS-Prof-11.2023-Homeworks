@@ -17,6 +17,7 @@
 		C6B9BFD22BC2BC5B00CF5B1E /* LocationDetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B9BFD12BC2BC5B00CF5B1E /* LocationDetailsViewModel.swift */; };
 		C6B9BFD52BC2BC8A00CF5B1E /* DatabaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B9BFD42BC2BC8A00CF5B1E /* DatabaseViewModel.swift */; };
 		C6B9BFD92BC2BD9000CF5B1E /* RickAndMortyAPI in Frameworks */ = {isa = PBXBuildFile; productRef = C6B9BFD82BC2BD9000CF5B1E /* RickAndMortyAPI */; };
+		C6B9BFDC2BC30DEA00CF5B1E /* AnchorKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B9BFDB2BC30DEA00CF5B1E /* AnchorKey.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 		C6B9BFD12BC2BC5B00CF5B1E /* LocationDetailsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationDetailsViewModel.swift; sourceTree = "<group>"; };
 		C6B9BFD42BC2BC8A00CF5B1E /* DatabaseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseViewModel.swift; sourceTree = "<group>"; };
 		C6B9BFD72BC2BD1A00CF5B1E /* RickAndMortyAPI */ = {isa = PBXFileReference; lastKnownFileType = text; name = RickAndMortyAPI; path = Modules/RickAndMortyAPI; sourceTree = SOURCE_ROOT; };
+		C6B9BFDB2BC30DEA00CF5B1E /* AnchorKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnchorKey.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 				C6B9BFD72BC2BD1A00CF5B1E /* RickAndMortyAPI */,
 				C681B7122BBC7BB10077C2F3 /* HomeworkApp.swift */,
 				C681B7162BBC7BB20077C2F3 /* Assets.xcassets */,
+				C6B9BFDA2BC30DE000CF5B1E /* Helpers */,
 				C681B7182BBC7BB20077C2F3 /* Preview Content */,
 				C6B9BFB72BC1DC1300CF5B1E /* Screens */,
 			);
@@ -125,6 +128,14 @@
 				C6B9BFB92BC1DC3900CF5B1E /* DetailsScreen.swift */,
 			);
 			path = CharacterDetails;
+			sourceTree = "<group>";
+		};
+		C6B9BFDA2BC30DE000CF5B1E /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				C6B9BFDB2BC30DEA00CF5B1E /* AnchorKey.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -207,6 +218,7 @@
 				C6B9BFBA2BC1DC3900CF5B1E /* DetailsScreen.swift in Sources */,
 				C6B9BFD22BC2BC5B00CF5B1E /* LocationDetailsViewModel.swift in Sources */,
 				C6B9BFD52BC2BC8A00CF5B1E /* DatabaseViewModel.swift in Sources */,
+				C6B9BFDC2BC30DEA00CF5B1E /* AnchorKey.swift in Sources */,
 				C6B9BFC82BC2B67800CF5B1E /* LocationDetailsScreen.swift in Sources */,
 				C681B7132BBC7BB10077C2F3 /* HomeworkApp.swift in Sources */,
 			);

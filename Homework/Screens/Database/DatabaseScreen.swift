@@ -28,12 +28,14 @@ enum Tab: CaseIterable {
 
 struct DatabaseScreen: View {
     
-    @EnvironmentObject var navigationViewModel: NavigationViewModel
+    @EnvironmentObject private var navigationViewModel: NavigationViewModel
     
-    @State var selectedTabIndex = 0
-    var tabs = Tab.allCases
+    @State private var selectedTabIndex = 0
+    private var tabs = Tab.allCases
     
-    @ObservedObject var viewModel = DatabaseViewModel()
+    @State private var favoriteEpisodes = [(index: Int, anchor: Anchor<CGPoint>)]()
+    
+    @ObservedObject private var viewModel = DatabaseViewModel()
     
     var body: some View {
         VStack {
@@ -119,9 +121,9 @@ struct DatabaseScreen: View {
                     }
                 }
             }
-                .onAppear(perform: {
-                    viewModel.loadNextLocationsPageIfNeeded(appearedLocationIndex: index)
-                })
+            .onAppear(perform: {
+                viewModel.loadNextLocationsPageIfNeeded(appearedLocationIndex: index)
+            })
         }
         .onAppear(perform: {
             viewModel.loadInitialLocationsIfNeeded()
@@ -129,28 +131,73 @@ struct DatabaseScreen: View {
     }
     
     var episodesList: some View {
-        List(viewModel.episodes.enumerated().map({ $0 }), id: \.element.id) { index, episode in
-            VStack(alignment: .leading) {
-                Text(episode.name)
-                Text(episode.episode)
-                    .font(.caption)
-                if viewModel.needToDisplayActivityInEpisode(onIndex: index) {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                            .scaleEffect(2.0, anchor: .center)
-                            .padding(.vertical, 16)
-                        Spacer()
+        ZStack(alignment: .bottom) {
+            List(viewModel.episodes.enumerated().map({ $0 }), id: \.element.id) { index, episode in
+                VStack(alignment: .leading) {
+                    EpisodeView(name: episode.name, code: episode.episode)
+                    if viewModel.needToDisplayActivityInEpisode(onIndex: index) {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                                .scaleEffect(2.0, anchor: .center)
+                                .padding(.vertical, 16)
+                            Spacer()
+                        }
                     }
                 }
-            }
+                .anchorPreference(key: AnchorKey.self, value: .topLeading, transform: { $0 })
+                .overlayPreferenceValue(AnchorKey.self, { anchor in
+                    Button(
+                        action: {
+                            withAnimation(.easeIn) {
+                                favoriteEpisodes.append((index: index, anchor: anchor!))
+                            }
+                        },
+                        label: { }
+                    )
+                })
                 .onAppear(perform: {
                     viewModel.loadNextEpisodesPageIfNeeded(appearedEpisodeIndex: index)
                 })
+            }
+            RoundedRectangle(cornerRadius: 5)
+                .fill(Color.gray)
+                .frame(height: 80)
+                .overlay(Text("\(favoriteEpisodes.count)"))
+                .background(
+                    GeometryReader { proxy in
+                        ZStack {
+                            ForEach(Array(self.favoriteEpisodes.enumerated()), id: \.offset) { (_, item) in
+                                let episode = viewModel.episodes[item.index]
+                                EpisodeView(name: episode.name, code: episode.episode)
+                                    .transition(.offset(x: proxy[item.anchor].x, y: proxy[item.anchor].y))
+                            }
+                        }
+                    }
+                )
+                .offset(y: 80)
         }
+        .ignoresSafeArea(edges: .bottom)
         .onAppear(perform: {
             viewModel.loadInitialEpisodesIfNeeded()
         })
+    }
+    
+    struct EpisodeView: View {
+        
+        let name: String
+        let code: String
+        
+        var body: some View {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(name)
+                    Text(code)
+                        .font(.caption)
+                }
+                Spacer()
+            }
+        }
     }
 }
 
