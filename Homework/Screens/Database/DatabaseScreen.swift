@@ -26,17 +26,6 @@ enum Tab: CaseIterable {
     }
 }
 
-final class DatabaseViewModel: ObservableObject {
-    
-    @Published var characters = [Character]()
-    
-    init() {
-        RickAndMortyAPI.shared.getCharacters { [weak self] characters in
-            self?.characters = characters
-        }
-    }
-}
-
 struct DatabaseScreen: View {
     
     @EnvironmentObject var navigationViewModel: NavigationViewModel
@@ -71,7 +60,11 @@ struct DatabaseScreen: View {
         List(viewModel.characters, id: \.id) { character in
             Button(
                 action: {
-                    navigationViewModel.push(screenView: DetailsScreen())
+                    navigationViewModel.push(
+                        screenView: CharacterDetailsScreen(
+                            character: character
+                        )
+                    )
                 },
                 label: {
                     HStack(alignment: .center, spacing: 14) {
@@ -90,9 +83,18 @@ struct DatabaseScreen: View {
                         
                         Text(character.name)
                     }
+                    .onAppear(perform: {
+                        if viewModel.characters[viewModel.characters.count - 1].id == character.id {
+                            // perform loading
+                            viewModel.loadNextCharactersPage()
+                        }
+                    })
                 }
             )
         }
+        .onAppear(perform: {
+            viewModel.loadNextCharactersPage()
+        })
     }
     
     var locationsList: some View {
