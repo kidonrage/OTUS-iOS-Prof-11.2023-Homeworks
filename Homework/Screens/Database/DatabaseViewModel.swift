@@ -10,6 +10,8 @@ import RickAndMortyAPI
 
 final class DatabaseViewModel: ObservableObject {
     
+    @ForceInjected private var api: RickAndMortyAPI
+    
     private var charactersPageToLoad: Int = 1
     @Published private(set) var isCharactersLoading = false
     @Published var characters = [Character]()
@@ -77,7 +79,7 @@ final class DatabaseViewModel: ObservableObject {
     private func loadNextCharactersPage() {
         guard !isCharactersLoading else { return }
         isCharactersLoading = true
-        RickAndMortyAPI.shared.getCharacters(page: charactersPageToLoad) { [weak self] characters in
+        api.getCharacters(page: charactersPageToLoad) { [weak self] characters in
             self?.characters.append(contentsOf: characters)
             self?.charactersPageToLoad += 1
             self?.isCharactersLoading = false
@@ -87,7 +89,7 @@ final class DatabaseViewModel: ObservableObject {
     private func loadNextLocationsPage() {
         guard !isLocationsLoading else { return }
         isLocationsLoading = true
-        RickAndMortyAPI.shared.loadLocations(page: locationsPageToLoad) { [weak self] response in
+        api.loadLocations(page: locationsPageToLoad) { [weak self] response in
             self?.locations.append(contentsOf: response?.results ?? [])
             self?.locationsPageToLoad += 1
             self?.isLocationsLoading = false
@@ -97,7 +99,7 @@ final class DatabaseViewModel: ObservableObject {
     private func loadNextEpisodesPage() {
         guard !isEpisodesLoading else { return }
         isEpisodesLoading = true
-        RickAndMortyAPI.shared.loadEpisodes(page: episodesPageToLoad) { [weak self] response in
+        api.loadEpisodes(page: episodesPageToLoad) { [weak self] response in
             self?.episodes.append(contentsOf: response?.results ?? [])
             self?.episodesPageToLoad += 1
             self?.isEpisodesLoading = false

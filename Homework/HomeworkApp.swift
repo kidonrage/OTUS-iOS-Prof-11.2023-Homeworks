@@ -7,11 +7,17 @@
 
 import SwiftUI
 import CustomNavigationStack
+import RickAndMortyAPI
 
 @main
 struct HomeworkApp: App {
     
     private let viewModel = NavigationViewModel()
+    
+    init() {
+        let api: RickAndMortyAPI = RickAndMortyAPIImp()
+        ServiceLocator.shared.register(service: api)
+    }
     
     var body: some Scene {
         WindowGroup {

@@ -7,33 +7,32 @@
 
 import Foundation
 
-public final class RickAndMortyAPI {
+public protocol RickAndMortyAPI: AnyObject {
     
-    public static let shared = RickAndMortyAPI()
+    func getCharacters(page: Int, completionHandler: @escaping ([Character]) -> Void)
+    func loadEpisodes(page: Int, completionHandler: @escaping (EpisodesReponse?) -> Void)
+    func loadLocations(page: Int, completionHandler: @escaping (LocationsResponse?) -> Void)
+    func loadLocation(locationUrl: URL, completionHandler: @escaping (Location?) -> Void)
+}
+
+public final class RickAndMortyAPIImp: RickAndMortyAPI {
     
-    private let decoder = JSONDecoder()
+    private let parser = Parser()
     
-    private init() {}
+    // MARK: - Initializers
+    public init() {}
     
     // MARK: - Public
     
     public func getCharacters(page: Int, completionHandler: @escaping ([Character]) -> Void) {
         let url = URL(string: "https://rickandmortyapi.com/api/character/?page=\(page)")!
         let request = URLRequest(url: url)
-        URLSession.shared.dataTask(with: request) { data, response, error in
-//            sleep(2)
-            guard error == nil else {
-                assertionFailure(error?.localizedDescription ?? "Unknown error")
-                return
-            }
-            guard let data else {
-                assertionFailure("Data is empty")
-                return
-            }
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            //            sleep(2)
             do {
-                let responseObj = try self.decoder.decode(CharactersResponse.self, from: data)
+                let responseObj: CharactersResponse? = try self?.parser.parseResults(data: data, error: error)
                 DispatchQueue.main.async {
-                    completionHandler(responseObj.results)
+                    completionHandler(responseObj?.results ?? [])
                 }
             } catch {
                 print(error.localizedDescription)
@@ -47,18 +46,10 @@ public final class RickAndMortyAPI {
     public func loadLocations(page: Int, completionHandler: @escaping (LocationsResponse?) -> Void) {
         let url = URL(string: "https://rickandmortyapi.com/api/location/?page=\(page)")!
         let request = URLRequest(url: url)
-        URLSession.shared.dataTask(with: request) { data, response, error in
-//            sleep(2)
-            guard error == nil else {
-                assertionFailure(error?.localizedDescription ?? "Unknown error")
-                return
-            }
-            guard let data else {
-                assertionFailure("Data is empty")
-                return
-            }
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            //            sleep(2)
             do {
-                let responseObj = try self.decoder.decode(LocationsResponse.self, from: data)
+                let responseObj: LocationsResponse? = try self?.parser.parseResults(data: data, error: error)
                 DispatchQueue.main.async {
                     completionHandler(responseObj)
                 }
@@ -74,18 +65,10 @@ public final class RickAndMortyAPI {
     public func loadEpisodes(page: Int, completionHandler: @escaping (EpisodesReponse?) -> Void) {
         let url = URL(string: "https://rickandmortyapi.com/api/episode/?page=\(page)")!
         let request = URLRequest(url: url)
-        URLSession.shared.dataTask(with: request) { data, response, error in
-//            sleep(2)
-            guard error == nil else {
-                assertionFailure(error?.localizedDescription ?? "Unknown error")
-                return
-            }
-            guard let data else {
-                assertionFailure("Data is empty")
-                return
-            }
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            //            sleep(2)
             do {
-                let responseObj = try self.decoder.decode(EpisodesReponse.self, from: data)
+                let responseObj: EpisodesReponse? = try self?.parser.parseResults(data: data, error: error)
                 DispatchQueue.main.async {
                     completionHandler(responseObj)
                 }
@@ -100,19 +83,12 @@ public final class RickAndMortyAPI {
     
     public func loadLocation(locationUrl: URL, completionHandler: @escaping (Location?) -> Void) {
         let request = URLRequest(url: locationUrl)
-        URLSession.shared.dataTask(with: request, completionHandler: { data, respone, error in
-            guard error == nil else {
-                assertionFailure(error?.localizedDescription ?? "Unknown error")
-                return
-            }
-            guard let data else {
-                assertionFailure("Data is empty")
-                return
-            }
+        URLSession.shared.dataTask(with: request, completionHandler: { [weak self] data, response, error in
+            //            sleep(2)
             do {
-                let location = try self.decoder.decode(Location.self, from: data)
+                let responseObj: Location? = try self?.parser.parseResults(data: data, error: error)
                 DispatchQueue.main.async {
-                    completionHandler(location)
+                    completionHandler(responseObj)
                 }
             } catch {
                 print(error.localizedDescription)

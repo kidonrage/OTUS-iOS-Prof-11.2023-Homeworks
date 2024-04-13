@@ -12,6 +12,8 @@ final class LocationDetailsViewModel: ObservableObject {
     
     @Published var model: Location?
     
+    @ForceInjected private var api: RickAndMortyAPI
+    
     private let locationUrl: String
     
     init(locationUrl: String) {
@@ -19,7 +21,7 @@ final class LocationDetailsViewModel: ObservableObject {
     }
     
     func handleOnAppear() {
-        RickAndMortyAPI.shared.loadLocation(locationUrl: URL(string: locationUrl)!) { locationModel in
+        api.loadLocation(locationUrl: URL(string: locationUrl)!) { locationModel in
             self.model = locationModel
         }
     }
