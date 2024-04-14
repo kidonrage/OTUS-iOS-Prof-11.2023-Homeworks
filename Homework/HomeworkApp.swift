@@ -22,7 +22,20 @@ struct HomeworkApp: App {
     var body: some Scene {
         WindowGroup {
             CustomNavigationView(viewModel: viewModel, contentBuilder: {
-                DatabaseScreen()
+                DatabaseScreen(
+                    charactersStore: CharactersStore(
+                        initialState: .init(),
+                        middlewares: [charactersMiddleware(charactersService: CharactersService())]
+                    ),
+                    locationsStore: LocationsStore(
+                        initialState: .init(),
+                        middlewares: [locationsMiddleware(locationsService: LocationsService())]
+                    ),
+                    episodesStore: EpisodesStore(
+                        initialState: .init(),
+                        middlewares: [episodesMiddleware(episodesService: EpisodesService())]
+                    )
+                )
             }, transition: (push: .scale, pop: .slide))
         }
     }

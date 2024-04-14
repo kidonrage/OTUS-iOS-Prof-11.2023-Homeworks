@@ -48,7 +48,15 @@ struct CharacterDetailsScreen: View {
                             .padding(.vertical, 8)
                         
                         Button(action: {
-                            navigationVM.push(screenView: LocationDetailsScreen(viewModel: .init(locationUrl: character.location.url)))
+                            // TODO: Кто должен след создавать экран?
+                            navigationVM.push(
+                                screenView: LocationDetailsScreen(
+                                    store: LocationDetailsStore(
+                                        initialState: .init(locationUrl: URL(string: character.location.url)!),
+                                        middlewares: [locationDetailsMiddleware(locationsService: LocationsService())]
+                                    )
+                                )
+                            )
                         }, label: {
                             HStack {
                                 VStack(alignment: .leading) {

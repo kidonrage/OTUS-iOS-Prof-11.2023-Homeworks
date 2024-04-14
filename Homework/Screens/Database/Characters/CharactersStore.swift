@@ -1,5 +1,5 @@
 //
-//  Flix.swift
+//  CharactersStore.swift
 //  Homework
 //
 //  Created by Vlad Eliseev on 14.04.2024.
@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import Flux
 import RickAndMortyAPI
 
 // MARK: - State
@@ -23,7 +24,6 @@ struct CharactersState {
 enum CharactersAction {
     
     // User-initiated actions
-    case initialFetch
     case fetchNextPage
     
     // State mutating actions
@@ -33,17 +33,6 @@ enum CharactersAction {
 }
 
 // MARK: - Reducer
-
-// Reducer должен быть ЧИСТОЙ ФУНКЦИЕЙ, к-рая принимает на вход актуальное состояние и action, и в зависимости от action'а меняет это состояние
-//typealias Reducer<StateType, ActionType> = (inout StateType, ActionType) -> StateType
-
-protocol Reducer {
-    
-    associatedtype StateType
-    associatedtype ActionType
-    
-    func reduce(state: StateType, action: ActionType) -> StateType
-}
 
 struct CharactersReducer: Reducer {
     
@@ -56,8 +45,6 @@ struct CharactersReducer: Reducer {
             state.isCharactersLoading = isLoading
         case .setCharacters(let array):
             state.characters = array
-        case .initialFetch:
-            break
         case .fetchNextPage:
             break
         }
@@ -66,8 +53,6 @@ struct CharactersReducer: Reducer {
 }
 
 // MARK: - Middleware
-
-typealias Middleware<StateType, ActionType> = (StateType, ActionType) -> AnyPublisher<ActionType, Never>?
 
 func charactersMiddleware(charactersService: CharactersService) -> Middleware<CharactersState, CharactersAction> {
     return { state, action in
@@ -82,8 +67,6 @@ func charactersMiddleware(charactersService: CharactersService) -> Middleware<Ch
                 .append(Just(CharactersAction.setNextPage(state.charactersPageToLoad + 1)))
                 .append(Just(CharactersAction.setIsLoading(false)))
                 .eraseToAnyPublisher()
-        case .initialFetch:
-            break
         case .setNextPage(_):
             break
         case .setIsLoading(_):
@@ -97,26 +80,10 @@ func charactersMiddleware(charactersService: CharactersService) -> Middleware<Ch
 
 // MARK: - Store
 
-final class CharactersStore: ObservableObject {
-    
-    // Доступ к состоянию извне read-only
-    @Published private(set) var state: CharactersState = .init()
-    
-    private var tasks = [AnyCancellable]()
-    
-    private let serialQueue = DispatchQueue(label: "flux.serial.queue")
-    
+final class CharactersStore: FluxStore<CharactersState, CharactersAction>, ObservableObject {
+
+    private let serialQueue = DispatchQueue(label: "flux.characters")
     private let reducer = CharactersReducer()
-    private let middlewares: [Middleware<CharactersState, CharactersAction>]
-    private var middlewareCancellables = Set<AnyCancellable>()
-    
-    init(
-        initialState: CharactersState,
-        middlewares: [Middleware<CharactersState, CharactersAction>]
-    ) {
-        self.state = initialState
-        self.middlewares = middlewares
-    }
     
     func dispatch(action: CharactersAction) {
         state = reducer.reduce(state: state, action: action)

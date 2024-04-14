@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  CharactersListItemView.swift
 //  
 //
 //  Created by Vlad Eliseev on 14.04.2024.

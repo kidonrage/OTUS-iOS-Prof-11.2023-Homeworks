@@ -9,25 +9,11 @@ import SwiftUI
 import CustomNavigationStack
 import RickAndMortyUI
 
-enum Tab: CaseIterable {
-    
-    case characters
-    case locations
-    case episodes
-    
-    var title: String {
-        switch self {
-        case .characters:
-            return "Characters"
-        case .locations:
-            return "Locations"
-        case .episodes:
-            return "Episodes"
-        }
-    }
-}
-
 struct DatabaseScreen: View {
+    
+    @ObservedObject private var charactersStore: CharactersStore
+    @ObservedObject private var locationsStore: LocationsStore
+    @ObservedObject private var episodesStore: EpisodesStore
     
     @EnvironmentObject private var navigationViewModel: NavigationViewModel
     
@@ -36,13 +22,15 @@ struct DatabaseScreen: View {
     
     @State private var favoriteEpisodes = [(index: Int, anchor: Anchor<CGPoint>)]()
     
-    @ObservedObject private var viewModel = DatabaseViewModel()
-    
-    // TODO: DI
-    @ObservedObject private var charactersStore = CharactersStore(
-        initialState: .init(),
-        middlewares: [charactersMiddleware(charactersService: CharactersService())]
-    )
+    init(
+        charactersStore: CharactersStore,
+        locationsStore: LocationsStore,
+        episodesStore: EpisodesStore
+    ) {
+        self.charactersStore = charactersStore
+        self.locationsStore = locationsStore
+        self.episodesStore = episodesStore
+    }
     
     var body: some View {
         VStack {
@@ -78,11 +66,11 @@ struct DatabaseScreen: View {
                     },
                     label: {
                         CharactersListItemView(character: character)
-                        .onAppear(perform: {
-                            if charactersStore.state.characters.count - 1 == index {
-                                charactersStore.dispatch(action: .fetchNextPage)
-                            }
-                        })
+                            .onAppear(perform: {
+                                if charactersStore.state.characters.count - 1 == index {
+                                    charactersStore.dispatch(action: .fetchNextPage)
+                                }
+                            })
                     }
                 )
                 if charactersStore.state.characters.count - 1 == index, charactersStore.state.isCharactersLoading {
@@ -100,12 +88,10 @@ struct DatabaseScreen: View {
     }
     
     var locationsList: some View {
-        List(viewModel.locations.enumerated().map({ $0 }), id: \.element.id) { index, location in
+        List(locationsStore.state.locations.enumerated().map({ $0 }), id: \.element.id) { index, location in
             VStack(alignment: .leading) {
-                Text(location.name)
-                Text(location.dimension)
-                    .font(.caption)
-                if viewModel.needToDisplayActivityInLocation(onIndex: index) {
+                LocationView(location: location)
+                if locationsStore.state.locations.count - 1 == index, locationsStore.state.isLoading {
                     HStack {
                         Spacer()
                         ProgressView()
@@ -116,20 +102,24 @@ struct DatabaseScreen: View {
                 }
             }
             .onAppear(perform: {
-                viewModel.loadNextLocationsPageIfNeeded(appearedLocationIndex: index)
+                if locationsStore.state.locations.count - 1 == index {
+                    locationsStore.dispatch(action: .fetchNextPage)
+                }
             })
         }
         .onAppear(perform: {
-            viewModel.loadInitialLocationsIfNeeded()
+            if locationsStore.state.locations.isEmpty {
+                locationsStore.dispatch(action: .fetchNextPage)
+            }
         })
     }
     
     var episodesList: some View {
         ZStack(alignment: .bottom) {
-            List(viewModel.episodes.enumerated().map({ $0 }), id: \.element.id) { index, episode in
+            List(episodesStore.state.episodes.enumerated().map({ $0 }), id: \.element.id) { index, episode in
                 VStack(alignment: .leading) {
                     EpisodeView(name: episode.name, code: episode.episode)
-                    if viewModel.needToDisplayActivityInEpisode(onIndex: index) {
+                    if episodesStore.state.episodes.count - 1 == index, episodesStore.state.isLoading {
                         HStack {
                             Spacer()
                             ProgressView()
@@ -151,7 +141,9 @@ struct DatabaseScreen: View {
                     )
                 })
                 .onAppear(perform: {
-                    viewModel.loadNextEpisodesPageIfNeeded(appearedEpisodeIndex: index)
+                    if episodesStore.state.episodes.count - 1 == index {
+                        episodesStore.dispatch(action: .fetchNextPage)
+                    }
                 })
             }
             RoundedRectangle(cornerRadius: 5)
@@ -162,7 +154,7 @@ struct DatabaseScreen: View {
                     GeometryReader { proxy in
                         ZStack {
                             ForEach(Array(self.favoriteEpisodes.enumerated()), id: \.offset) { (_, item) in
-                                let episode = viewModel.episodes[item.index]
+                                let episode = episodesStore.state.episodes[item.index]
                                 EpisodeView(name: episode.name, code: episode.episode)
                                     .transition(.offset(x: proxy[item.anchor].x, y: proxy[item.anchor].y))
                             }
@@ -173,28 +165,9 @@ struct DatabaseScreen: View {
         }
         .ignoresSafeArea(edges: .bottom)
         .onAppear(perform: {
-            viewModel.loadInitialEpisodesIfNeeded()
+            if episodesStore.state.episodes.isEmpty {
+                episodesStore.dispatch(action: .fetchNextPage)
+            }
         })
     }
-    
-    struct EpisodeView: View {
-        
-        let name: String
-        let code: String
-        
-        var body: some View {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(name)
-                    Text(code)
-                        .font(.caption)
-                }
-                Spacer()
-            }
-        }
-    }
-}
-
-#Preview {
-    DatabaseScreen()
 }

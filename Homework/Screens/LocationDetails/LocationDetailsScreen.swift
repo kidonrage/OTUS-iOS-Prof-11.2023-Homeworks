@@ -11,31 +11,22 @@ import CustomNavigationStack
 struct LocationDetailsScreen: View {
     
     @EnvironmentObject private var navigationVM: NavigationViewModel
+    @ObservedObject private var store: LocationDetailsStore
     
-    @ObservedObject private var viewModel: LocationDetailsViewModel
-    
-    init(viewModel: LocationDetailsViewModel) {
-        self.viewModel = viewModel
+    init(
+        store: LocationDetailsStore
+    ) {
+        self.store = store
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16, content: {
             Spacer()
-            Text(viewModel.model?.name ?? "")
+            Text(store.state.location?.name ?? "")
                 .font(.title)
                 .fontWeight(.bold)
-            VStack(alignment: .leading) {
-                Text("Type")
-                    .font(.caption2)
-                Text(viewModel.model?.type ?? "")
-                    .font(.title2)
-            }
-            VStack(alignment: .leading) {
-                Text("Dimension")
-                    .font(.caption2)
-                Text(viewModel.model?.dimension ?? "")
-                    .font(.title2)
-            }
+            property(title: "Type", value: store.state.location?.type ?? "")
+            property(title: "Dimension", value: store.state.location?.dimension ?? "")
             Button(action: {
                 navigationVM.pop()
             }, label: {
@@ -53,15 +44,17 @@ struct LocationDetailsScreen: View {
             alignment: .topLeading
         )
         .onAppear(perform: {
-            viewModel.handleOnAppear()
+            store.dispatch(action: .loadLocation)
         })
     }
-}
-
-#Preview {
-    LocationDetailsScreen(
-        viewModel: LocationDetailsViewModel(
-            locationUrl: "https://rickandmortyapi.com/api/location/1"
-        )
-    )
+    
+    @ViewBuilder
+    func property(title: String, value: String) -> some View {
+        VStack(alignment: .leading) {
+            Text(title)
+                .font(.caption2)
+            Text(value)
+                .font(.title2)
+        }
+    }
 }
