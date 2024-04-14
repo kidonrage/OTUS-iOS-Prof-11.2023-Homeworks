@@ -11,11 +11,7 @@ import RickAndMortyAPI
 final class DatabaseViewModel: ObservableObject {
     
     @ForceInjected private var api: RickAndMortyAPI
-    
-    private var charactersPageToLoad: Int = 1
-    @Published private(set) var isCharactersLoading = false
-    @Published var characters = [Character]()
-    
+
     private var locationsPageToLoad: Int = 1
     @Published private(set) var isLocationsLoading = false
     @Published var locations = [Location]()
@@ -25,22 +21,6 @@ final class DatabaseViewModel: ObservableObject {
     @Published var episodes = [Episode]()
     
     // MARK: - Public methods
-    
-    // MARK: Characters
-    
-    func loadInitialCharactersIfNeeded() {
-        guard characters.isEmpty else { return }
-        loadNextCharactersPage()
-    }
-    
-    func loadNextCharactersPageIfNeeded(appearedCharacterIndex index: Int) {
-        guard characters[characters.count - 1].id == characters[index].id else { return }
-        loadNextCharactersPage()
-    }
-    
-    func needToDisplayActivityInCharacter(onIndex index: Int) -> Bool {
-        return characters.count - 1 == index && isCharactersLoading
-    }
     
     // MARK: Locations
     
@@ -75,16 +55,6 @@ final class DatabaseViewModel: ObservableObject {
     }
     
     // MARK: - Private methods
-    
-    private func loadNextCharactersPage() {
-        guard !isCharactersLoading else { return }
-        isCharactersLoading = true
-        api.getCharacters(page: charactersPageToLoad) { [weak self] characters in
-            self?.characters.append(contentsOf: characters)
-            self?.charactersPageToLoad += 1
-            self?.isCharactersLoading = false
-        }
-    }
     
     private func loadNextLocationsPage() {
         guard !isLocationsLoading else { return }

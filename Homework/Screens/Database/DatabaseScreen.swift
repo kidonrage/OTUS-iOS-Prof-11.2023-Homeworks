@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CustomNavigationStack
+import RickAndMortyUI
 
 enum Tab: CaseIterable {
     
@@ -37,6 +38,12 @@ struct DatabaseScreen: View {
     
     @ObservedObject private var viewModel = DatabaseViewModel()
     
+    // TODO: DI
+    @ObservedObject private var charactersStore = CharactersStore(
+        initialState: .init(),
+        middlewares: [charactersMiddleware(charactersService: CharactersService())]
+    )
+    
     var body: some View {
         VStack {
             Text("Rick and morty database")
@@ -59,7 +66,7 @@ struct DatabaseScreen: View {
     }
     
     var charactersList: some View {
-        List(viewModel.characters.enumerated().map({ $0 }), id: \.element.id) { index, character in
+        List(charactersStore.state.characters.enumerated().map({ $0 }), id: \.element.id) { index, character in
             VStack {
                 Button(
                     action: {
@@ -70,30 +77,15 @@ struct DatabaseScreen: View {
                         )
                     },
                     label: {
-                        HStack(alignment: .center, spacing: 14) {
-                            AsyncImage(
-                                url: URL(string: character.image),
-                                content: { image in
-                                    image.resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                },
-                                placeholder: {
-                                    ProgressView()
-                                }
-                            )
-                            .frame(width: 150, height: 150)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            
-                            Text(character.name)
-                            
-                            Spacer()
-                        }
+                        CharactersListItemView(character: character)
                         .onAppear(perform: {
-                            viewModel.loadNextCharactersPageIfNeeded(appearedCharacterIndex: index)
+                            if charactersStore.state.characters.count - 1 == index {
+                                charactersStore.dispatch(action: .fetchNextPage)
+                            }
                         })
                     }
                 )
-                if viewModel.needToDisplayActivityInCharacter(onIndex: index) {
+                if charactersStore.state.characters.count - 1 == index, charactersStore.state.isCharactersLoading {
                     ProgressView()
                         .scaleEffect(2.0, anchor: .center)
                         .padding(.vertical, 16)
@@ -101,7 +93,9 @@ struct DatabaseScreen: View {
             }
         }
         .onAppear(perform: {
-            viewModel.loadInitialCharactersIfNeeded()
+            if charactersStore.state.characters.isEmpty {
+                charactersStore.dispatch(action: .fetchNextPage)
+            }
         })
     }
     
