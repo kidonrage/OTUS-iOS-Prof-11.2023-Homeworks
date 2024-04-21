@@ -7,13 +7,14 @@
 
 import SwiftUI
 
-struct InputView: View {
+struct InputScreen: View {
     
     @State var input: String = ""
     @EnvironmentObject var appRouter: AppRouter
     
     var body: some View {
         VStack(alignment: .leading) {
+            Text("Через пробел")
             TextField(text: $input, label: {
                 Text("Сюда")
             })
@@ -40,5 +41,5 @@ struct InputView: View {
 }
 
 #Preview {
-    InputView()
+    InputScreen()
 }

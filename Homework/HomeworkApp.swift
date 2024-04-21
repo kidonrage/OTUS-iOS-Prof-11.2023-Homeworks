@@ -15,11 +15,11 @@ struct HomeworkApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $appRouter.path) {
-                InputView()
+                InputScreen()
                     .navigationDestination(for: Screen.self) { selection in
                         switch selection {
                         case .results(let input):
-                            ResultsScreen()
+                            ResultsScreen(input: input)
                         }
                     }
                     .navigationBarTitleDisplayMode(.inline)
