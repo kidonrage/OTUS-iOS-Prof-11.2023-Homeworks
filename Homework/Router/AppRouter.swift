@@ -9,5 +9,5 @@ import Foundation
 
 final class AppRouter: ObservableObject {
     
-    @Published var focusedTab: Tab = .anotherTabOpener
+    @Published var path = [Screen]()
 }
