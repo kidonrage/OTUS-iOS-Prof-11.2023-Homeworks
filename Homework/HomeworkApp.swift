@@ -27,8 +27,4 @@ struct HomeworkApp: App {
             .environmentObject(appRouter)
         }
     }
-    
-    init() {
-        print(buildSuffixArray("banana"))
-    }
 }
