@@ -20,6 +20,8 @@ struct HomeworkApp: App {
                         switch selection {
                         case .results(let input):
                             ResultsScreen(input: input)
+                        case .history(let list):
+                            SearchHistoryScreen(list: list)
                         }
                     }
                     .navigationBarTitleDisplayMode(.inline)

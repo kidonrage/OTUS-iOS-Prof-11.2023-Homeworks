@@ -7,6 +7,16 @@
 
 import Foundation
 
+struct HistoryEntry: Hashable, Equatable, Identifiable {
+    
+    var id: Int {
+        hashValue
+    }
+    
+    let suffixTitle: String
+    let searchTime: TimeInterval
+}
+
 enum Screen: Identifiable, Hashable {
     
     var id: Int {
@@ -14,4 +24,5 @@ enum Screen: Identifiable, Hashable {
     }
     
     case results(input: String)
+    case history(history: [HistoryEntry])
 }

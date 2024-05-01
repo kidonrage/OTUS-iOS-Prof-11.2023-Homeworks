@@ -37,6 +37,13 @@ struct ResultsScreen: View {
                     TextField(text: $listViewModel.searchText, label: {
                         Text("Поиск")
                     }).padding()
+                    Button {
+                        appRouter.path.append(.history(history: listViewModel.searchHistory))
+                    } label: {
+                        Image(systemName: "clock.fill")
+                        Text(String(describing: listViewModel.searchHistory.count))
+                    }
+
                     Picker(selection: $listViewModel.selectedListSortType) {
                         ForEach(SortType.allCases) { sortType in
                             Text(sortType.title).tag(sortType)
